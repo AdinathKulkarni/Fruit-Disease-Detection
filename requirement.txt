@@ -1,0 +1,32 @@
+flask
+tensorflow
+numpy
+pillow
+
+
+this is working fine. now what happens is here i select the images from the directory and then make the prediction. what i am thinking is i want to do the real time prediction for both the fruits. 
+
+in the website what i want is an button to open the web camera to capture the image. this image will be feeding to the respective model according to the dropdown option. 
+
+i also want to do the real time detection with the help of the the web camera.
+
+above are the things that i want in project. now implement these things as i am telling u below.
+
+
+redesign the entire website.
+1.I want a greeting message each time i open the website "नमस्ते किसान!".
+
+2.then first i want an option to select the fruit. Mango or Strawberry.
+
+3.then i want 2 buttons below that, one is for to choose the image, and the other one to 
+capture image from the webcamera/Phone camera.
+
+4.when the user select the webcamera option the a pop up should come asking if they want to do it in real time or just to capture image.
+
+5. if the user select capture image option then the captured image will go to the respective model. after capturing the image successfully a message should pop up that tell us image uploaded successfully.
+
+6. if the user select the real time option then the web camera will be used for real time detection by asking for what fruit they want to do it.
+
+7.  in the last there should be a make prediction button that will send the captured/chosen image to the respective model.
+
+8.the processed output of the model should be shown below the make prediction button with the class name and the bounding box.
