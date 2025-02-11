@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Static folder for saving output images
-OUTPUT_DIR = r"/static"
+OUTPUT_DIR = os.path.join(os.getcwd(), "static")
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
