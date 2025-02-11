@@ -8,6 +8,10 @@ import tensorflow as tf
 import io
 import os
 from ultralytics import YOLO  # Import the correct YOLO model loader
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -180,4 +184,5 @@ def static_files(filename):
     return send_from_directory(OUTPUT_DIR, filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+    port = int(os.getenv('FLASK_PORT', 8000))
+    app.run(debug=True, port=port)

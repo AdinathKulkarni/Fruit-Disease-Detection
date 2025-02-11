@@ -5,3 +5,4 @@ opencv-python==4.10.0.84
 tensorflow==2.18.0
 ultralytics==8.0.28
 torch==2.5.1
+python-dotenv==1.0.1
