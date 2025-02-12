@@ -19,8 +19,8 @@ if not os.path.exists(OUTPUT_DIR):
 
 # Define the model paths and disease labels for different models
 MODEL_PATHS = {
-    "mango": r"Mango.keras",  # Path to mango model
-    "strawberry": r"C:\Drive E\me\UBUNTU\DenseNet_For_Strawberry\bestModels\130_384\best_model_fold_2.keras"  # Path to strawberry model
+    "mango": r"Models\Mango.keras",  # Path to mango model
+    "strawberry": r"Models\Strawberry.keras"  # Path to strawberry model
 }
 
 DISEASE_LABELS = {
@@ -47,7 +47,7 @@ for model_type, model_path in MODEL_PATHS.items():
         raise RuntimeError(f"Failed to load model for {model_type}: {e}")
 
 # Load YOLO model using the correct method (ultralytics package)
-yolo_model = YOLO(r'best.pt')  # Path to your YOLO model
+yolo_model = YOLO(r'Models\best.pt')  # Path to your YOLO model
 
 # List of valid fruit names (only mango and strawberry are valid)
 valid_fruits = ['mango', 'strawberry']
