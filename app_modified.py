@@ -7,7 +7,14 @@ from PIL import Image, ImageDraw
 import tensorflow as tf
 import io
 import os
-from ultralytics import YOLO  # Import the correct YOLO model loader
+from ultralytics import YOLO
+
+# Force TensorFlow to use CPU
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+tf.config.set_visible_devices([], 'GPU')
+
+# Force PyTorch to use CPU
+device = torch.device('cpu')
 
 app = Flask(__name__)
 CORS(app)
@@ -19,8 +26,8 @@ if not os.path.exists(OUTPUT_DIR):
 
 # Define the model paths and disease labels for different models
 MODEL_PATHS = {
-    "mango": r"Models\Mango.keras",  # Path to mango model
-    "strawberry": r"Models\Strawberry.keras"  # Path to strawberry model
+    "mango": r"Models\Mango.keras",
+    "strawberry": r"Models\Strawberry.keras"
 }
 
 DISEASE_LABELS = {
@@ -39,17 +46,19 @@ DISEASE_LABELS = {
 models = {}
 for model_type, model_path in MODEL_PATHS.items():
     try:
-        model = tf.keras.models.load_model(model_path, compile=False)
-        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        with tf.device('/cpu:0'):  # Force model to load on CPU
+            model = tf.keras.models.load_model(model_path, compile=False)
+            model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
         models[model_type] = model
-        print(f"Model for {model_type} loaded successfully.")
+        print(f"Model for {model_type} loaded successfully on CPU.")
     except Exception as e:
         raise RuntimeError(f"Failed to load model for {model_type}: {e}")
 
-# Load YOLO model using the correct method (ultralytics package)
-yolo_model = YOLO(r'Models\best.pt')  # Path to your YOLO model
+# Load YOLO model using CPU
+yolo_model = YOLO(r'Models\best.pt')
+yolo_model.to('cpu')  # Ensure YOLO model is on CPU
 
-# List of valid fruit names (only mango and strawberry are valid)
+# List of valid fruit names
 valid_fruits = ['mango', 'strawberry']
 
 # List of class names for your YOLO model
@@ -61,27 +70,28 @@ class_names = [
 
 @app.route('/')
 def index():
-    return render_template('index_modified.html')
+    return render_template('index.html')
 
 def predict_fruit_with_yolo(img):
     # Convert PIL Image to NumPy array for YOLO
     img = np.array(img)
 
-    # Resize image to 320x320 as required by YOLO model
+    # Resize image to 640x640 as required by YOLO model
     img_resized = cv2.resize(img, (640, 640))
 
-    # If your image is in RGB, convert it to BGR (as expected by OpenCV)
+    # Convert to BGR (as expected by OpenCV)
     img_bgr = cv2.cvtColor(img_resized, cv2.COLOR_RGB2BGR)
 
-    # Perform inference with YOLO
-    results = yolo_model(img_bgr)  # YOLO expects a NumPy array of images
+    # Perform inference with YOLO on CPU
+    with torch.no_grad():  # Disable gradient calculation for inference
+        results = yolo_model(img_bgr)  # YOLO inference on CPU
 
     # Extract predictions from results
-    pred = results[0].boxes  # First result in the batch
+    pred = results[0].boxes
 
     # Get the class IDs and confidence scores
-    class_ids = pred.cls.cpu().numpy()  # YOLO class IDs
-    confidences = pred.conf.cpu().numpy()  # YOLO confidence scores
+    class_ids = pred.cls.cpu().numpy()
+    confidences = pred.conf.cpu().numpy()
 
     # Access class names directly from the YOLO model
     class_labels = yolo_model.names
@@ -94,7 +104,6 @@ def predict_fruit_with_yolo(img):
     predicted_class = class_labels[int(class_ids[highest_confidence_index])]
     confidence = confidences[highest_confidence_index]
 
-    # Ensure the predicted class is in the list of valid fruits
     if predicted_class.lower() not in valid_fruits:
         raise ValueError(f"The image that you uploaded has {predicted_class} in it. Please upload a valid image.")
 
@@ -102,11 +111,9 @@ def predict_fruit_with_yolo(img):
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Ensure an image is uploaded
     if 'image' not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
 
-    # Get the fruit type from request parameters (e.g., "mango" or "strawberry")
     fruit_type = request.form.get('fruit_type', '').lower()
     if fruit_type not in models:
         return jsonify({"error": "Invalid fruit type provided"}), 400
@@ -116,17 +123,14 @@ def predict():
         return jsonify({"error": "No file selected"}), 400
 
     try:
-        # Load the image from the file
         img = Image.open(io.BytesIO(file.read())).convert("RGB")
         
-        # Predict the fruit type using YOLO
+        # Predict fruit type using YOLO on CPU
         predicted_fruit, confidence = predict_fruit_with_yolo(img)
 
-        # Check if the YOLO prediction matches the selected fruit
         if predicted_fruit.lower() != fruit_type:
             return jsonify({"error": f"The uploaded image is of a {predicted_fruit}, not a {fruit_type}."}), 400
         
-        # Resize the image for disease classification
         original_width, original_height = img.size
         if fruit_type == "mango":
             input_size = (224, 224)
@@ -137,17 +141,16 @@ def predict():
         img_array = np.array(img_resized) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
-        # Load the disease classification model for the selected fruit
-        model = models[fruit_type]
+        # Perform disease classification on CPU
+        with tf.device('/cpu:0'):
+            predictions = models[fruit_type].predict(img_array)
+        
         disease_labels = DISEASE_LABELS[fruit_type]
-
-        # Predict disease class
-        predictions = model.predict(img_array)
         predicted_class = np.argmax(predictions, axis=1)[0]
         predicted_label = disease_labels[predicted_class]
         disease_confidence = float(predictions[0][predicted_class]) * 100
 
-        # Mock bounding box (for illustration)
+        # Mock bounding box
         bbox_resized = [50, 50, 150, 150]
         x_min = int(bbox_resized[0] * (original_width / input_size[0]))
         y_min = int(bbox_resized[1] * (original_height / input_size[1]))
@@ -155,13 +158,12 @@ def predict():
         y_max = int(bbox_resized[3] * (original_height / input_size[1]))
         bbox_original = [x_min, y_min, x_max, y_max]
 
-        # Draw the bounding box and disease label
+        # Draw bounding box and label
         draw = ImageDraw.Draw(img)
         draw.rectangle(bbox_original, outline="red", width=3)
         draw.text((bbox_original[0], bbox_original[1] - 10),
                   f"{predicted_label} ({disease_confidence:.2f}%)", fill="red")
 
-        # Save output image
         output_filename = f"output_{file.filename}"
         output_path = os.path.join(OUTPUT_DIR, output_filename)
         img.save(output_path)
