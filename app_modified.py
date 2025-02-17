@@ -55,7 +55,7 @@ for model_type, model_path in MODEL_PATHS.items():
         raise RuntimeError(f"Failed to load model for {model_type}: {e}")
 
 # Load YOLO model using CPU
-yolo_model = YOLO(r'Models\best.pt')
+yolo_model = YOLO(r'Models\best - small.pt')
 yolo_model.to('cpu')  # Ensure YOLO model is on CPU
 
 # List of valid fruit names
