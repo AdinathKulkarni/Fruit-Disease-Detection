@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+#convert the code to cpu
+
 app = Flask(__name__)
 CORS(app)
 
@@ -51,7 +53,7 @@ for model_type, model_path in MODEL_PATHS.items():
         raise RuntimeError(f"Failed to load model for {model_type}: {e}")
 
 # Load YOLO model using the correct method (ultralytics package)
-yolo_model = YOLO(r'Models/best.pt')  # Path to your YOLO model
+yolo_model = YOLO(r'Models\best - small.pt')  # Path to your YOLO model
 
 # List of valid fruit names (only mango and strawberry are valid)
 valid_fruits = ['mango', 'strawberry']
