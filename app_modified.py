@@ -52,11 +52,17 @@ for model_type, model_path in MODEL_PATHS.items():
         models[model_type] = model
         print(f"Model for {model_type} loaded successfully on CPU.")
     except Exception as e:
+        print(f"Error loading {model_type} model: {e}")
         raise RuntimeError(f"Failed to load model for {model_type}: {e}")
 
 # Load YOLO model using CPU
-yolo_model = YOLO(r'Models\best - small.pt')
-yolo_model.to('cpu')  # Ensure YOLO model is on CPU
+try:
+    yolo_model = YOLO(os.path.join(os.getcwd(), "Models", "best - small.pt"))
+    yolo_model.to('cpu')  # Ensure YOLO model is on CPU
+    print("YOLO model loaded successfully on CPU.")
+except Exception as e:
+    print(f"Error loading YOLO model: {e}")
+    raise RuntimeError(f"Failed to load YOLO model: {e}")
 
 # List of valid fruit names
 valid_fruits = ['mango', 'strawberry']
@@ -182,4 +188,4 @@ def static_files(filename):
     return send_from_directory(OUTPUT_DIR, filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=4000)
+    app.run(debug=True, host='0.0.0.0', port=os.getenv('PORT', 5000))
