@@ -7,12 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="font-roboto text-black-700 bg-cover bg-center bg-fixed relative" style="background-image: url('/static/images/WhatsApp Image 2025-01-21 at 7.18.21 PM.jpeg');">
+
+    <!-- Top Right Corner Navigation -->
+    <div class="absolute top-5 right-5 flex space-x-4">
+        <a href="/" class="text-white text-lg font-semibold hover:underline">Home</a>
+        <a href="/ask a question" class="text-white text-lg font-semibold hover:underline">QnA</a>
+        <a href="/contact" class="text-white text-lg font-semibold hover:underline">Contact Us</a>
+    </div>
     
-    <!-- <div class="absolute inset-0 bg-black opacity-10 sm:opacity-10 md:opacity-10 lg:opacity-10 xl:opacity-40 -z-10"></div> -->
-
-
+    <!-- Header Section -->
     <header class="bg-green-500 text-white text-2xl font-bold uppercase tracking-wider py-5 text-center">
-        Fruit Disease Detector
+        <a href="/" class="text-white hover:underline">Fruit Disease Detector</a>
     </header>
 
     <div class="max-w-2xl mx-auto mt-10 p-6 bg-white bg-opacity-80 rounded-3xl shadow-lg text-center">
@@ -23,6 +28,7 @@
                 <option value="" disabled selected>Select Fruit 🍉</option>
                 <option value="mango">Mango 🥭</option>
                 <option value="strawberry">Strawberry 🍓</option>
+                <option value="apple"> Apple 🍎</option>
             </select>
 
             <button type="button" id="cameraButton" onclick="toggleCamera()" class="bg-gray-200 w-48 py-3 border-2 border-black rounded-xl text-lg hover:bg-gray-400">
@@ -43,8 +49,11 @@
 
         <div id="result-container" class="mt-6">
             <div id="successMessage" class="text-green-600 font-bold hidden">Image uploaded and prediction made successfully!</div>
-            <h3 class="text-lg font-semibold text-black mt-3">Prediction Result:</h3>
-            <div id="predictionResult" class="text-black mt-2"></div>
+            <!-- The prediction result header is now hidden by default -->
+            <div id="prediction-section" class="hidden">
+                <h3 class="text-lg font-semibold text-black mt-3">Prediction Result:</h3>
+                <div id="predictionResult" class="text-black mt-2"></div>
+            </div>
             <img id="output-image" class="w-96 h-72 object-cover border-2 border-gray-300 rounded-lg hidden mx-auto mt-4" alt="Input Image">
         </div>
 
@@ -56,7 +65,6 @@
     <footer class="text-center text-white text-lg mt-40 py-4">
         &copy; Fruit Disease AI Detection System
     </footer>
-    
 
     <script>
         let stream;
@@ -112,6 +120,8 @@
                                 imageElement.classList.remove("hidden");
                                 imageElement.style.width = `${canvas.width}px`;
                                 imageElement.style.height = `${canvas.height}px`;
+                                // Show the prediction section
+                                document.getElementById("prediction-section").classList.remove("hidden");
                             }
 
                             document.getElementById("successMessage").classList.remove("hidden");
@@ -172,6 +182,8 @@
                             document.getElementById("predictionResult").innerHTML = `Disease: ${data.label} | Confidence: ${data.confidence}%`;
                             document.getElementById("output-image").src = URL.createObjectURL(file);
                             document.getElementById("output-image").classList.remove("hidden");
+                            // Show the prediction section
+                            document.getElementById("prediction-section").classList.remove("hidden");
                         }
                         document.getElementById("successMessage").classList.remove("hidden");
                     })
