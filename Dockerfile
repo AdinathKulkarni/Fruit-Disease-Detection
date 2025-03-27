@@ -14,4 +14,5 @@ COPY requirement.txt .
 RUN pip install --no-cache-dir -r requirement.txt
 COPY . .
 EXPOSE ${PORT}
-CMD ["python", "app.py"]
+# CMD ["python", "app.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:4000", "app:app", "--reload"]
