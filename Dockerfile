@@ -2,8 +2,8 @@ FROM python:3.10-slim
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 ENV CUDA_VISIBLE_DEVICES=-1
-ENV PORT=8000
-RUN apt-get-update && apt-get install -y\
+ENV PORT=4000
+RUN apt-get update && apt-get install -y\
     libgl1-mesa-glx \
     libglib2.0.0 \
     libsm6 \
