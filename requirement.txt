@@ -9,3 +9,4 @@ tensorflow
 requests
 python-dotenv
 ultralytics
+gunicorn
