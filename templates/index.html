@@ -3,21 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fruit Disease Detector</title>
+    <title>Disease Detector</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .drawer {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(-100%);
+            position: fixed;
+            top: 50;
+            left: 0;
+            right: 0;
+            z-index: 50;
+        }
+        
+        .drawer.open {
+            transform: translateY(0);
+        }
+        
+        .drawer-backdrop {
+            transition: opacity 0.5s ease-in-out;
+            opacity: 10%;
+            visibility: hidden;
+        }
+        
+        .drawer-backdrop.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
 </head>
 <body class="font-roboto text-black-700 bg-cover bg-center bg-fixed relative" style="background-image: url('/static/images/WhatsApp Image 2025-01-21 at 7.18.21 PM.jpeg');">
 
-    <!-- Top Right Corner Navigation -->
-    <div class="absolute top-5 right-5 flex space-x-4">
-        <a href="/" class="text-white text-lg font-semibold hover:underline">Home</a>
-        <a href="/ask a question" class="text-white text-lg font-semibold hover:underline">QnA</a>
-        <a href="/contact" class="text-white text-lg font-semibold hover:underline">Contact Us</a>
+    <!-- Top Drawer Navigation -->
+    <div id="drawerBackdrop" class="drawer-backdrop fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleDrawer()"></div>
+    
+    <div id="drawer" class="drawer bg-black shadow-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl text-white font-bold">Menu</h2>
+            <button onclick="toggleDrawer()" class="text-white text-2xl">&times;</button>
+        </div>
+        <nav class="flex flex-col space-y-4">
+            <a href="/" class="text-white text-lg font-semibold hover:underline p-2  w-full">Home</a>
+            <a href="/ask a question" class="text-white text-lg font-semibold hover:underline p-2  w-full">QnA</a>
+            <a href="/contact" class="text-white text-lg font-semibold hover:underline p-2 w-full">Contact Us</a>
+        </nav>
+    </div>
+
+    <!-- Menu Button (moved to upper right corner) -->
+    <div class="absolute top-4 right-2 z-30">
+        <button onclick="toggleDrawer()" class="bg-green-500 p-2 rounded-md shadow-md">            
+            <svg class="h-6 w-6" stroke="black">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
     </div>
     
     <!-- Header Section -->
     <header class="bg-green-500 text-white text-2xl font-bold uppercase tracking-wider py-5 text-center">
-        <a href="/" class="text-white hover:underline">Fruit Disease Detector</a>
+        <a href="/" class="text-white hover:underline">Disease Detector</a>
     </header>
 
     <div class="max-w-2xl mx-auto mt-10 p-6 bg-white bg-opacity-80 rounded-3xl shadow-lg text-center">
@@ -69,6 +112,15 @@
     <script>
         let stream;
         let cameraStarted = false;
+        
+        // Drawer functionality
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawer');
+            const backdrop = document.getElementById('drawerBackdrop');
+            
+            drawer.classList.toggle('open');
+            backdrop.classList.toggle('open');
+        }
 
         function toggleCamera() {
             const videoElement = document.getElementById("cameraPreview");
